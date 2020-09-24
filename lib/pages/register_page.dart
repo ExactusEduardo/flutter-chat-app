@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:chat/helpers/mostrar_alerta.dart';
+import 'package:chat/services/auth_service.dart';
 
 import 'package:chat/widgets/custom_input.dart';
 import 'package:chat/widgets/logo.dart';
 import 'package:chat/widgets/labels.dart';
 import 'package:chat/widgets/boton_azul.dart';
+
 
 class RegisterPage extends StatelessWidget {
   @override
@@ -47,6 +52,9 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
        margin: EdgeInsets.only( top: 40 ),
        padding: EdgeInsets.symmetric( horizontal: 50 ),
@@ -75,10 +83,20 @@ class __FormState extends State<_Form> {
 
            // TODO: Crear boton
           BotonAzul(
-            text: 'Ingrese',
-            onPressed: () {
-              print( emailCtrl.text );
-              print( passCtrl.text );
+            text: 'Crear cuenta',
+            onPressed: authService.autenticando ? null : () async {
+              // print( emailCtrl.text );
+              // print( passCtrl.text );
+
+              FocusScope.of(context).unfocus(); // Quitar Teclado
+              final loginOk = await authService.register(nameCtrl.text.trim(), emailCtrl.text.trim(), passCtrl.text.trim());
+              if ( loginOk == true ) {
+                // TODO: Navegar a otra pantalla
+                Navigator.pushReplacementNamed(context, 'usuarios');
+              } else {
+                // Mostrar alerta
+                mostrarAlerta(context, 'Registro Incorrecto', loginOk);
+              }
             },
           ),
          ],

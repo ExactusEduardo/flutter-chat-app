@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
+import 'package:chat/services/auth_service.dart';
+
+import 'package:chat/helpers/mostrar_alerta.dart';
 
 import 'package:chat/widgets/custom_input.dart';
 import 'package:chat/widgets/logo.dart';
 import 'package:chat/widgets/labels.dart';
 import 'package:chat/widgets/boton_azul.dart';
+
 
 class LoginPage extends StatelessWidget {
   @override
@@ -46,12 +52,13 @@ class __FormState extends State<_Form> {
 
   @override
   Widget build(BuildContext context) {
+    final authService = Provider.of<AuthService>(context);
+
     return Container(
        margin: EdgeInsets.only( top: 40 ),
        padding: EdgeInsets.symmetric( horizontal: 50 ),
        child: Column(
          children: <Widget>[
-           
           CustomInput(
             icon: Icons.mail_outline,
             placeholder: 'Correo',
@@ -65,13 +72,21 @@ class __FormState extends State<_Form> {
             textController: passCtrl,
             isPassword: true,
           ),
-
            // TODO: Crear boton
           BotonAzul(
             text: 'Ingrese',
-            onPressed: () {
-              print( emailCtrl.text );
-              print( passCtrl.text );
+            onPressed: authService.autenticando ? null : () async {
+              // print( emailCtrl.text.trim() );
+              // print( passCtrl.text.trim() );
+              FocusScope.of(context).unfocus(); // Quitar Teclado
+              final loginOk = await authService.login(emailCtrl.text.trim(), passCtrl.text.trim());
+              if ( loginOk ) {
+                // TODO: Navegar a otra pantalla
+                Navigator.pushReplacementNamed(context, 'usuarios');
+              } else {
+                // Mostrar alerta
+                mostrarAlerta(context, 'Login Incorrecto', 'Revise sus credenciales nuevamente.');
+              }
             },
           ),
          ],
